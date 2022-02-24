@@ -62,13 +62,16 @@ def get(cgx):
         for element in cgx.get.elements().cgx_content['items']:
             if element["site_id"] == site_id:
                 element_id = element["id"]
-                print("Checking " + element["name"])
+                element_name = element["name"]
+                if element_name == None:
+                    element_name = "no-name"
+                print("Checking " + element_name)
                 for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
                     if interface["used_for"] == "lan":
                         try:
                             ion_data = {}
                             ion_data["Site_Name"] = site_name
-                            ion_data["ION_Name"] = element["name"]
+                            ion_data["ION_Name"] = element_name
                             ion_data["Interface"] = interface["name"]
                             ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
                             if ion_data["DHCP/Static"] == "static":
@@ -85,7 +88,7 @@ def get(cgx):
                                 ion_data["DHCP_Relay"] = None
                             ion_list.append(ion_data)
                         except:
-                            print("Failed to collect interface data on " + element["name"] + " interface " + interface["name"])
+                            print("Failed to collect interface data on " + element_name + " interface " + interface["name"])
      
     csv_columns = ['Site_Name','ION_Name', 'Interface', 'DHCP/Static',"IP", "DNS", "DHCP_Relay"]
     csv_file = "interface_ip.csv"
