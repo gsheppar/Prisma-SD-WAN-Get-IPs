@@ -66,29 +66,32 @@ def get(cgx):
                 if element_name == None:
                     element_name = "no-name"
                 print("Checking " + element_name)
-                for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
-                    if interface["used_for"] == "lan":
-                        try:
-                            ion_data = {}
-                            ion_data["Site_Name"] = site_name
-                            ion_data["ION_Name"] = element_name
-                            ion_data["Interface"] = interface["name"]
-                            ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
-                            if ion_data["DHCP/Static"] == "static":
-                                ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
-                            else:
-                                ion_data["IP"] = None
-                            if interface["ipv4_config"]["dns_v4_config"]:
-                                ion_data["DNS"] = ", ".join(interface["ipv4_config"]["dns_v4_config"]["name_servers"])
-                            else:
-                                ion_data["DNS"] = None
-                            if interface["dhcp_relay"]:
-                                ion_data["DHCP_Relay"] = ", ".join(interface["dhcp_relay"]["server_ips"])
-                            else:
-                                ion_data["DHCP_Relay"] = None
-                            ion_list.append(ion_data)
-                        except:
-                            print("Failed to collect interface data on " + element_name + " interface " + interface["name"])
+                try:
+                    for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
+                        if interface["used_for"] == "lan":
+                            try:
+                                ion_data = {}
+                                ion_data["Site_Name"] = site_name
+                                ion_data["ION_Name"] = element_name
+                                ion_data["Interface"] = interface["name"]
+                                ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
+                                if ion_data["DHCP/Static"] == "static":
+                                    ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
+                                else:
+                                    ion_data["IP"] = None
+                                if interface["ipv4_config"]["dns_v4_config"]:
+                                    ion_data["DNS"] = ", ".join(interface["ipv4_config"]["dns_v4_config"]["name_servers"])
+                                else:
+                                    ion_data["DNS"] = None
+                                if interface["dhcp_relay"]:
+                                    ion_data["DHCP_Relay"] = ", ".join(interface["dhcp_relay"]["server_ips"])
+                                else:
+                                    ion_data["DHCP_Relay"] = None
+                                ion_list.append(ion_data)
+                            except:
+                                print("Failed to collect interface data on " + element_name + " interface " + interface["name"])
+                except:
+                    print("Failed to collect interface data on " + element_name)
      
     csv_columns = ['Site_Name','ION_Name', 'Interface', 'DHCP/Static',"IP", "DNS", "DHCP_Relay"]
     csv_file = "interface_ip.csv"
