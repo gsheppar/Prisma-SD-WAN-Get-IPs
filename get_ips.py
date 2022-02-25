@@ -64,11 +64,11 @@ def get(cgx):
                 element_id = element["id"]
                 element_name = element["name"]
                 if element_name == None:
-                    element_name = "no-name"
+                    element_name = "no-name-element"
                 print("Checking " + element_name)
                 try:
                     for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
-                        if interface["used_for"] == "lan":
+                        if interface["used_for"] == "lan":                       
                             try:
                                 ion_data = {}
                                 ion_data["Site_Name"] = site_name
@@ -76,9 +76,10 @@ def get(cgx):
                                 ion_data["Interface"] = interface["name"]
                                 ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
                                 if ion_data["DHCP/Static"] == "static":
-                                    ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
-                                else:
-                                    ion_data["IP"] = None
+                                    if interface["ipv4_config"]["static_config"]:
+                                        ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
+                                    else:
+                                        ion_data["IP"] = None
                                 if interface["ipv4_config"]["dns_v4_config"]:
                                     ion_data["DNS"] = ", ".join(interface["ipv4_config"]["dns_v4_config"]["name_servers"])
                                 else:
@@ -91,16 +92,21 @@ def get(cgx):
                             except:
                                 print("Failed to collect interface data on " + element_name + " interface " + interface["name"])
                 except:
-                    print("Failed to collect interface data on " + element_name)
+                    print("No interfaces on " + element_name + " to check")
+        
      
     csv_columns = ['Site_Name','ION_Name', 'Interface', 'DHCP/Static',"IP", "DNS", "DHCP_Relay"]
     csv_file = "interface_ip.csv"
     try:
-        with open(csv_file, 'w') as csvfile:
+        with open(csv_file, 'w', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
             writer.writeheader()
             for data in ion_list:
-                writer.writerow(data)
+                try:
+                    writer.writerow(data)
+                except:
+                    print("Failed to write data for row")
+                    print(data)
             print("\nSaved interface_ip.csv file")
     except IOError:
         print("CSV Write Failed")
